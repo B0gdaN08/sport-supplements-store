@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders — SportSupps Store</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">Sport<span>Supps</span></a>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/categories.html" class="nav-link">Categories</a>
+        <a href="/products.html" class="nav-link">Products</a>
+        <a href="/orders.html" class="nav-link active">Orders</a>
+      </div>
+      <span class="nav-api-badge">REST API</span>
+    </div>
+  </nav>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Status patch modal (quick) -->
+  <div class="modal-overlay" id="statusModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Update Order Status</span>
+        <button class="modal-close" onclick="closeStatusModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="statusOrderId" />
+        <div class="form-group">
+          <label class="form-label">Order ID</label>
+          <input type="text" id="statusOrderIdDisplay" class="form-control" disabled />
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Status *</label>
+          <select id="newStatus" class="form-control">
+            <option value="pending">⏳ Pending</option>
+            <option value="confirmed">✅ Confirmed</option>
+            <option value="shipped">🚚 Shipped</option>
+            <option value="delivered">📦 Delivered</option>
+            <option value="cancelled">❌ Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeStatusModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyStatusPatch()">Update Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Edit Order</span>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Customer Name *</label>
+            <input type="text" id="editCustomerName" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" id="editCustomerEmail" class="form-control" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shipping Address</label>
+          <textarea id="editShippingAddress" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="editStatus" class="form-control">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea id="editNotes" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>Customer <span>Orders</span></h1>
+        <p>Track and manage customer orders. Update statuses, view items, delete records.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('list', this)">📋 All Orders</button>
+        <button class="tab-btn" onclick="switchTab('create', this)">➕ New Order</button>
+        <button class="tab-btn" onclick="switchTab('patch', this)">⚡ PATCH Status</button>
+        <button class="tab-btn" onclick="switchTab('find', this)">🔍 Find by ID</button>
+      </div>
+
+      <!-- Tab: List -->
+      <div class="tab-content active" id="tab-list">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Orders</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="filterStatus" class="form-control" style="width:auto;font-size:13px;padding:6px 30px 6px 10px;" onchange="loadOrders()">
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders()">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="panel-body" style="padding:0;">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  <tr><td colspan="8" style="text-align:center;padding:40px;"><span class="spinner"></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Create -->
+      <div class="tab-content" id="tab-create">
+        <div class="panel" style="max-width:700px;">
+          <div class="panel-header">
+            <span class="panel-title">➕ New Order</span>
+          </div>
+          <div class="panel-body">
+            <form id="createForm" novalidate>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Customer Name *</label>
+                  <input type="text" id="createName" class="form-control" placeholder="Full name" />
+                  <span class="form-error" id="createNameError">Name is required.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email *</label>
+                  <input type="email" id="createEmail" class="form-control" placeholder="customer@email.com" />
+                  <span class="form-error" id="createEmailError">Valid email required.</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Shipping Address</label>
+                <textarea id="createAddress" class="form-control" placeholder="Street, City, Country"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" id="createNotes" class="form-control" placeholder="Optional delivery notes" />
+              </div>
+
+              <!-- Order items builder -->
+              <div class="form-group">
+                <label class="form-label" style="margin-bottom:10px;">Order Items *</label>
+                <div id="orderItems">
+                  <!-- Items added dynamically -->
+                </div>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="addItem()" style="margin-top:8px;">
+                  + Add Item
+                </button>
+                <span class="form-error" id="createItemsError" style="display:none;">At least one item required.</span>
+              </div>
+
+              <div id="orderTotal" style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:var(--accent);margin:12px 0;"></div>
+
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Create Order</button>
+                <button type="button" class="btn btn-ghost" onclick="resetCreate()">Clear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: PATCH -->
+      <div class="tab-content" id="tab-patch">
+        <div class="panel" style="max-width:400px;">
+          <div class="panel-header">
+            <span class="panel-title">⚡ Update Status (PATCH)</span>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="form-label">Order ID *</label>
+              <input type="number" id="patchId" class="form-control" placeholder="1" min="1" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Status *</label>
+              <select id="patchStatus" class="form-control">
+                <option value="pending">⏳ Pending</option>
+                <option value="confirmed">✅ Confirmed</option>
+                <option value="shipped">🚚 Shipped</option>
+                <option value="delivered">📦 Delivered</option>
+                <option value="cancelled">❌ Cancelled</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" onclick="patchOrder()">Apply PATCH</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Find -->
+      <div class="tab-content" id="tab-find">
+        <div class="panel" style="max-width:500px;">
+          <div class="panel-header">
+            <span class="panel-title">🔍 Find Order by ID</span>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="form-label">Order ID</label>
+              <div style="display:flex;gap:8px;">
+                <input type="number" id="searchId" class="form-control" placeholder="1" min="1" />
+                <button class="btn btn-secondary" onclick="findById()">Search</button>
+              </div>
+            </div>
+            <div id="findResult" style="margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      SportSupps Store · <span>Distributed Systems</span> · University Project
+    </div>
+  </footer>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/orders.js"></script>
+</body>
+</html>
