@@ -92,10 +92,22 @@ function clearFormErrors(formId) {
  */
 async function apiFetch(url, options = {}) {
   try {
+    // Automatically attach the JWT from localStorage if present
+    const token = localStorage.getItem('sportsupps_token');
+    const authHeader = token ? { 'Authorization': 'Bearer ' + token } : {};
+
     const res = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 'Content-Type': 'application/json', ...authHeader, ...(options.headers || {}) },
       ...options,
     });
+
+    // If 401, redirect to login
+    if (res.status === 401) {
+      localStorage.removeItem('sportsupps_token');
+      window.location.href = '/login.html';
+      return { ok: false, status: 401, data: { error: 'Session expired.' } };
+    }
+
     const data = await res.json();
     return { ok: res.ok, status: res.status, data };
   } catch (err) {

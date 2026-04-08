@@ -8,7 +8,6 @@
 </head>
 <body>
 
-  <!-- ─── Navigation ─────────────────────────────────────── -->
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="/" class="navbar-brand">Sport<span>Supps</span></a>
@@ -17,25 +16,26 @@
         <a href="/categories.html" class="nav-link">Categories</a>
         <a href="/products.html" class="nav-link">Products</a>
         <a href="/orders.html" class="nav-link">Orders</a>
+        <a href="/users.html" class="nav-link admin-only">Users</a>
       </div>
-      <span class="nav-api-badge">REST API</span>
+      <div id="navUser"></div>
     </div>
   </nav>
 
-  <!-- ─── Hero ────────────────────────────────────────────── -->
   <main>
     <div class="container">
       <section class="hero">
         <p class="hero-eyebrow">Distributed Systems · University Project</p>
         <h1>Sport<br><span class="highlight">Supps</span><br>Store</h1>
         <p>
-          A fully functional REST API with in-memory persistence. 
-          Manage products, categories and orders with complete CRUD operations 
+          A fully functional REST API with in-memory persistence.
+          Manage products, categories and orders with complete CRUD operations
           and proper HTTP semantics.
         </p>
         <div class="btn-group">
           <a href="/products.html" class="btn btn-primary btn-lg">Browse Products</a>
-          <a href="/orders.html" class="btn btn-secondary btn-lg">View Orders</a>
+          <a href="/orders.html" class="btn btn-secondary btn-lg auth-only">My Orders</a>
+          <a href="/login.html" class="btn btn-secondary btn-lg guest-only">Sign In</a>
         </div>
 
         <div class="hero-cards">
@@ -43,25 +43,31 @@
             <div class="hero-card-icon">🗂️</div>
             <h3>Categories</h3>
             <p>Protein, Creatine, Pre-Workout and more.</p>
-            <span class="hero-card-badge">Manage →</span>
+            <span class="hero-card-badge admin-only">Manage →</span>
+            <span class="hero-card-badge user-only">Browse →</span>
+            <span class="hero-card-badge guest-only">Browse →</span>
           </a>
           <a href="/products.html" class="hero-card">
             <div class="hero-card-icon">📦</div>
             <h3>Products</h3>
             <p>Full supplement catalog with prices and stock.</p>
-            <span class="hero-card-badge">Manage →</span>
+            <span class="hero-card-badge admin-only">Manage →</span>
+            <span class="hero-card-badge user-only">Shop →</span>
+            <span class="hero-card-badge guest-only">Browse →</span>
           </a>
           <a href="/orders.html" class="hero-card">
             <div class="hero-card-icon">🛒</div>
             <h3>Orders</h3>
             <p>Customer orders with status tracking.</p>
-            <span class="hero-card-badge">Manage →</span>
+            <span class="hero-card-badge admin-only">Manage →</span>
+            <span class="hero-card-badge auth-only" style="display:none;">My Orders →</span>
+            <span class="hero-card-badge guest-only">Login to order →</span>
           </a>
         </div>
       </section>
 
-      <!-- API Reference quick summary -->
-      <section class="panel" style="margin-bottom: 60px;">
+      <!-- API Reference — admin only -->
+      <section class="panel admin-only" style="margin-bottom: 60px;">
         <div class="panel-header">
           <span class="panel-title">API Endpoints Reference</span>
           <span class="badge badge-blue">REST</span>
@@ -71,31 +77,28 @@
             <table>
               <thead>
                 <tr>
-                  <th>Method</th>
-                  <th>Endpoint</th>
-                  <th>Description</th>
-                  <th>Status</th>
+                  <th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/categories</code></td>      <td>List all categories</td>           <td>200</td></tr>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/categories/:id</code></td>  <td>Get category by ID</td>            <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/categories</code></td>      <td>Create category</td>               <td>201</td></tr>
-                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/categories/:id</code></td>  <td>Full update</td>                   <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/categories/:id</code></td>  <td>Partial update</td>                <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/categories/:id</code></td>  <td>Delete category</td>               <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/products</code></td>        <td>List all products (filter: ?categoryId)</td><td>200</td></tr>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/products/:id</code></td>    <td>Get product by ID</td>             <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/products</code></td>        <td>Create product</td>                <td>201</td></tr>
-                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/products/:id</code></td>    <td>Full update</td>                   <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/products/:id</code></td>    <td>Partial update</td>                <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/products/:id</code></td>    <td>Delete product</td>                <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/orders</code></td>          <td>List all orders (filter: ?status)</td><td>200</td></tr>
-                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/orders/:id</code></td>      <td>Get order by ID</td>               <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/orders</code></td>          <td>Create order</td>                  <td>201</td></tr>
-                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/orders/:id</code></td>      <td>Full update</td>                   <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/orders/:id</code></td>      <td>Update status</td>                 <td>200 / 404</td></tr>
-                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/orders/:id</code></td>      <td>Delete order</td>                  <td>200 / 404</td></tr>
+                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/auth/login</code></td>       <td>Login</td>                         <td>Public</td></tr>
+                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/auth/register</code></td>    <td>Register</td>                      <td>Public</td></tr>
+                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/auth/users</code></td>       <td>List all users</td>                <td>Admin</td></tr>
+                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/categories</code></td>      <td>List all categories</td>           <td>Public</td></tr>
+                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/categories</code></td>      <td>Create category</td>               <td>Admin</td></tr>
+                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/categories/:id</code></td>  <td>Full update</td>                   <td>Admin</td></tr>
+                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/categories/:id</code></td>  <td>Partial update</td>                <td>Admin</td></tr>
+                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/categories/:id</code></td>  <td>Delete category</td>               <td>Admin</td></tr>
+                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/products</code></td>        <td>List all products</td>             <td>Public</td></tr>
+                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/products</code></td>        <td>Create product</td>                <td>Admin</td></tr>
+                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/products/:id</code></td>    <td>Full update</td>                   <td>Admin</td></tr>
+                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/products/:id</code></td>    <td>Partial update</td>                <td>Admin</td></tr>
+                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/products/:id</code></td>    <td>Delete product</td>                <td>Admin</td></tr>
+                <tr><td><span class="badge badge-blue">GET</span></td>    <td><code>/api/orders</code></td>          <td>Orders (own only for users)</td>   <td>Auth / Guest=[]</td></tr>
+                <tr><td><span class="badge badge-green">POST</span></td>  <td><code>/api/orders</code></td>          <td>Create order</td>                  <td>Auth</td></tr>
+                <tr><td><span class="badge badge-orange">PUT</span></td>  <td><code>/api/orders/:id</code></td>      <td>Full update</td>                   <td>Admin</td></tr>
+                <tr><td><span class="badge badge-muted">PATCH</span></td> <td><code>/api/orders/:id</code></td>      <td>Update status</td>                 <td>Admin</td></tr>
+                <tr><td><span class="badge badge-red">DELETE</span></td>  <td><code>/api/orders/:id</code></td>      <td>Delete order</td>                  <td>Admin</td></tr>
               </tbody>
             </table>
           </div>
@@ -110,5 +113,15 @@
     </div>
   </footer>
 
+  <script src="/js/auth.js"></script>
+  <script>
+    renderNavAuth();
+    applyRoleUI();
+    // user-only + auth-only on orders card conflict — fix manually
+    document.querySelectorAll('.user-only.hero-card-badge, .auth-only.hero-card-badge').forEach(el => {
+      const user = getUser();
+      el.style.display = user ? '' : 'none';
+    });
+  </script>
 </body>
 </html>

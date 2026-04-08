@@ -7,21 +7,22 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/orderController');
+const { authenticate, requireAdmin, optionalAuth } = require('../middleware/auth');
 
-// GET    /api/orders            → list all (supports ?status= filter)
-// POST   /api/orders            → create
+// GET    /api/orders            → optionalAuth (admin sees all, user sees own, guest sees [])
+// POST   /api/orders            → must be logged in
 router.route('/')
-  .get(ctrl.getAllOrders)
-  .post(ctrl.createOrder);
+  .get(optionalAuth, ctrl.getAllOrders)
+  .post(authenticate, ctrl.createOrder);
 
-// GET    /api/orders/:id        → get one
-// PUT    /api/orders/:id        → full update
-// PATCH  /api/orders/:id        → partial update
-// DELETE /api/orders/:id        → delete
+// GET    /api/orders/:id        → must be logged in
+// PUT    /api/orders/:id        → admin only
+// PATCH  /api/orders/:id        → admin only
+// DELETE /api/orders/:id        → admin only
 router.route('/:id')
-  .get(ctrl.getOrderById)
-  .put(ctrl.updateOrder)
-  .patch(ctrl.patchOrder)
-  .delete(ctrl.deleteOrder);
+  .get(authenticate, ctrl.getOrderById)
+  .put(requireAdmin, ctrl.updateOrder)
+  .patch(requireAdmin, ctrl.patchOrder)
+  .delete(requireAdmin, ctrl.deleteOrder);
 
 module.exports = router;

@@ -75,12 +75,15 @@ const getAll = (filters = {}) => {
   if (filters.status) {
     result = result.filter(o => o.status === filters.status);
   }
+  if (filters.userId) {
+    result = result.filter(o => o.userId === filters.userId);
+  }
   return result;
 };
 
 const getById = (id) => orders.get(Number(id));
 
-const create = ({ customerName, customerEmail, items, shippingAddress, notes }) => {
+const create = ({ customerName, customerEmail, items, shippingAddress, notes, userId }) => {
   // Calculate total from items
   const parsedItems = (Array.isArray(items) ? items : []).map(item => ({
     productId: Number(item.productId),
@@ -92,6 +95,7 @@ const create = ({ customerName, customerEmail, items, shippingAddress, notes }) 
 
   const newOrder = {
     id: nextId++,
+    userId: userId || null,
     customerName,
     customerEmail,
     items: parsedItems,

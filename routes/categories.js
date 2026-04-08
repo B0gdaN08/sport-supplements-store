@@ -7,21 +7,22 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/categoryController');
+const { requireAdmin } = require('../middleware/auth');
 
-// GET    /api/categories        → list all categories
-// POST   /api/categories        → create a new category
+// GET    /api/categories        → public
+// POST   /api/categories        → admin only
 router.route('/')
   .get(ctrl.getAllCategories)
-  .post(ctrl.createCategory);
+  .post(requireAdmin, ctrl.createCategory);
 
-// GET    /api/categories/:id    → get one category
-// PUT    /api/categories/:id    → full update
-// PATCH  /api/categories/:id    → partial update
-// DELETE /api/categories/:id    → delete
+// GET    /api/categories/:id    → public
+// PUT    /api/categories/:id    → admin only
+// PATCH  /api/categories/:id    → admin only
+// DELETE /api/categories/:id    → admin only
 router.route('/:id')
   .get(ctrl.getCategoryById)
-  .put(ctrl.updateCategory)
-  .patch(ctrl.patchCategory)
-  .delete(ctrl.deleteCategory);
+  .put(requireAdmin, ctrl.updateCategory)
+  .patch(requireAdmin, ctrl.patchCategory)
+  .delete(requireAdmin, ctrl.deleteCategory);
 
 module.exports = router;

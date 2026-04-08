@@ -9,8 +9,15 @@ const Product = require('../models/productModel');
 // ─── GET /api/orders ──────────────────────────────────────────────────────────
 
 const getAllOrders = (req, res) => {
+  // Guest (no token) → empty list
+  if (!req.user) {
+    return res.status(200).json({ success: true, count: 0, data: [] });
+  }
+
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
+  // Non-admin users only see their own orders
+  if (req.user.role !== 'admin') filters.userId = req.user.id;
 
   const orders = Order.getAll(filters);
   res.status(200).json({
@@ -67,7 +74,7 @@ const createOrder = (req, res) => {
     return res.status(400).json({ success: false, error: 'Item validation failed.', details: itemErrors });
   }
 
-  const newOrder = Order.create({ customerName: customerName.trim(), customerEmail: customerEmail.trim(), items, shippingAddress, notes });
+  const newOrder = Order.create({ customerName: customerName.trim(), customerEmail: customerEmail.trim(), items, shippingAddress, notes, userId: req.user.id });
   res.status(201).json({ success: true, message: 'Order created successfully.', data: newOrder });
 };
 

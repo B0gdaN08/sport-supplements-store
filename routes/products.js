@@ -2,26 +2,30 @@
  * routes/products.js
  * Express router for Product endpoints.
  * Base path: /api/products
+ *
+ * GET  (read)  → public
+ * POST/PUT/PATCH/DELETE (write) → admin only
  */
 
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/productController');
+const { requireAdmin } = require('../middleware/auth');
 
-// GET    /api/products          → list all (supports ?categoryId= filter)
-// POST   /api/products          → create
+// GET    /api/products          → public
+// POST   /api/products          → admin only
 router.route('/')
   .get(ctrl.getAllProducts)
-  .post(ctrl.createProduct);
+  .post(requireAdmin, ctrl.createProduct);
 
-// GET    /api/products/:id      → get one
-// PUT    /api/products/:id      → full update
-// PATCH  /api/products/:id      → partial update
-// DELETE /api/products/:id      → delete
+// GET    /api/products/:id      → public
+// PUT    /api/products/:id      → admin only
+// PATCH  /api/products/:id      → admin only
+// DELETE /api/products/:id      → admin only
 router.route('/:id')
   .get(ctrl.getProductById)
-  .put(ctrl.updateProduct)
-  .patch(ctrl.patchProduct)
-  .delete(ctrl.deleteProduct);
+  .put(requireAdmin, ctrl.updateProduct)
+  .patch(requireAdmin, ctrl.patchProduct)
+  .delete(requireAdmin, ctrl.deleteProduct);
 
 module.exports = router;
