@@ -124,6 +124,7 @@ async function handleCreate(e) {
     stock: document.getElementById('createStock').value ? Number(document.getElementById('createStock').value) : undefined,
     weight: document.getElementById('createWeight').value ? Number(document.getElementById('createWeight').value) : undefined,
     flavors: document.getElementById('createFlavors').value.trim() || undefined,
+    imageUrl: document.getElementById('createImageUrl').value.trim() || undefined,
   };
 
   const { ok, data } = await apiFetch('/api/products', { method: 'POST', body: JSON.stringify(body) });
@@ -169,6 +170,7 @@ async function openEdit(id, mode) {
   document.getElementById('editCategoryId').value = p.categoryId || '';
   document.getElementById('editWeight').value = p.weight ?? '';
   document.getElementById('editFlavors').value = Array.isArray(p.flavors) ? p.flavors.join(', ') : (p.flavors || '');
+  document.getElementById('editImageUrl').value = p.imageUrl || '';
   document.getElementById('editModal').classList.add('open');
 }
 
@@ -194,6 +196,7 @@ async function saveModal() {
     stock: document.getElementById('editStock').value !== '' ? Number(document.getElementById('editStock').value) : undefined,
     weight: document.getElementById('editWeight').value !== '' ? Number(document.getElementById('editWeight').value) : undefined,
     flavors: document.getElementById('editFlavors').value.trim() || undefined,
+    imageUrl: document.getElementById('editImageUrl').value.trim() || undefined,
   };
 
   const method = mode === 'put' ? 'PUT' : 'PATCH';
@@ -304,22 +307,28 @@ function renderShop() {
     }
 
     return `
-      <div class="shop-card">
-        <div class="shop-card-header">
-          <div>
-            <div class="shop-card-name">${escHtml(p.name)}</div>
-            <div class="shop-card-brand">${escHtml(p.brand || '')}</div>
+      <div class="shop-card shop-card-img-wrap">
+        ${p.imageUrl
+          ? `<img src="${escHtml(p.imageUrl)}" alt="${escHtml(p.name)}" class="shop-card-img">`
+          : `<div class="shop-card-img-placeholder">📦</div>`
+        }
+        <div class="shop-card-content">
+          <div class="shop-card-header">
+            <div>
+              <div class="shop-card-name">${escHtml(p.name)}</div>
+              <div class="shop-card-brand">${escHtml(p.brand || '')}</div>
+            </div>
+            <span class="badge badge-muted">${escHtml(categoryName(p.categoryId))}</span>
           </div>
-          <span class="badge badge-muted">${escHtml(categoryName(p.categoryId))}</span>
-        </div>
-        ${p.description ? `<div class="shop-card-desc">${escHtml(p.description)}</div>` : ''}
-        <div class="shop-card-meta">
-          <span>${stockBadge(p.stock)} in stock</span>
-          ${p.weight ? `<span>⚖️ ${p.weight}g</span>` : ''}
-        </div>
-        <div class="shop-card-footer">
-          <span class="price">€${Number(p.price).toFixed(2)}</span>
-          ${actionHtml}
+          ${p.description ? `<div class="shop-card-desc">${escHtml(p.description)}</div>` : ''}
+          <div class="shop-card-meta">
+            <span>${stockBadge(p.stock)} in stock</span>
+            ${p.weight ? `<span>⚖️ ${p.weight}g</span>` : ''}
+          </div>
+          <div class="shop-card-footer">
+            <span class="price">€${Number(p.price).toFixed(2)}</span>
+            ${actionHtml}
+          </div>
         </div>
       </div>
     `;

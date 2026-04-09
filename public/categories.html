@@ -51,6 +51,10 @@
           <label class="form-label">Icon (emoji)</label>
           <input type="text" id="editIcon" class="form-control" placeholder="e.g. 💪" />
         </div>
+        <div class="form-group">
+          <label class="form-label">Image URL</label>
+          <input type="text" id="editImageUrl" class="form-control" placeholder="https://..." />
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -91,6 +95,10 @@
               <div class="form-group">
                 <label class="form-label">Icon (emoji)</label>
                 <input type="text" id="createIcon" class="form-control" placeholder="🏋️" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Image URL</label>
+                <input type="text" id="createImageUrl" class="form-control" placeholder="https://..." />
               </div>
               <div class="btn-group">
                 <button type="submit" class="btn btn-primary">Create Category</button>
@@ -134,8 +142,15 @@
         </div>
       </div>
 
-      <!-- Categories Table (all users) -->
-      <div class="panel" style="margin-top:24px;">
+      <!-- Categories Card Grid (users & guests) -->
+      <div id="categoriesGrid" style="margin-top:24px;display:none;">
+        <div class="shop-grid" id="categoriesCardBody">
+          <div style="text-align:center;padding:60px;grid-column:1/-1;"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <!-- Categories Table (admin) -->
+      <div class="panel admin-only" style="margin-top:24px;">
         <div class="panel-header">
           <span class="panel-title">All Categories</span>
           <button class="btn btn-ghost btn-sm" onclick="loadCategories()">↻ Refresh</button>

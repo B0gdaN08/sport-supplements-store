@@ -1,0 +1,350 @@
+{
+  "info": {
+    "name": "SportSupps Store API",
+    "description": "CRUD + PATCH operations for Categories, Products and Orders — SportSupps Store (Distributed Systems Project)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string",
+      "description": "Set this after running 'Login as Admin'"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('adminToken', json.token);",
+                  "  console.log('Token saved:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "description": "Login as admin. The test script automatically saves the token to the 'adminToken' collection variable."
+          }
+        },
+        {
+          "name": "Login as User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"pass1234\",\n  \"name\": \"New User\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/users", "host": ["{{baseUrl}}"], "path": ["api", "auth", "users"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "GET - List All Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] },
+            "description": "Returns all categories. Public — no authentication required."
+          }
+        },
+        {
+          "name": "GET - Find Category by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categories/1", "host": ["{{baseUrl}}"], "path": ["api", "categories", "1"] },
+            "description": "Returns a single category by its ID."
+          }
+        },
+        {
+          "name": "POST - Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nootropics\",\n  \"slug\": \"nootropics\",\n  \"description\": \"Cognitive enhancers for focus, memory and mental clarity.\",\n  \"icon\": \"🧠\",\n  \"imageUrl\": \"https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=200&fit=crop\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] },
+            "description": "Creates a new category. Requires admin token."
+          }
+        },
+        {
+          "name": "PUT - Full Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Whey & Casein Protein\",\n  \"slug\": \"whey-casein-protein\",\n  \"description\": \"All whey and casein protein supplements for muscle building.\",\n  \"icon\": \"💪\",\n  \"imageUrl\": \"https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=200&fit=crop\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categories/1", "host": ["{{baseUrl}}"], "path": ["api", "categories", "1"] },
+            "description": "Full replacement update of category with ID 1. All fields are overwritten."
+          }
+        },
+        {
+          "name": "PATCH - Partial Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Premium protein supplements including whey, casein and plant-based options.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categories/1", "host": ["{{baseUrl}}"], "path": ["api", "categories", "1"] },
+            "description": "Partial update — only the provided fields are changed. Other fields remain untouched."
+          }
+        },
+        {
+          "name": "DELETE - Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/categories/11", "host": ["{{baseUrl}}"], "path": ["api", "categories", "11"] },
+            "description": "Deletes category with ID 11. Requires admin token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET - List All Products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api", "products"] },
+            "description": "Returns all products. Public — no authentication required."
+          }
+        },
+        {
+          "name": "GET - List Products by Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products?categoryId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [{ "key": "categoryId", "value": "1" }]
+            },
+            "description": "Returns only products that belong to category ID 1 (Protein)."
+          }
+        },
+        {
+          "name": "GET - Find Product by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/products/1", "host": ["{{baseUrl}}"], "path": ["api", "products", "1"] },
+            "description": "Returns a single product by its ID."
+          }
+        },
+        {
+          "name": "POST - Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Isolate Zero Lactose\",\n  \"description\": \"100% whey isolate, zero lactose, ideal for lactose intolerant athletes.\",\n  \"price\": 64.99,\n  \"stock\": 75,\n  \"categoryId\": 1,\n  \"brand\": \"Rule1\",\n  \"weight\": 910,\n  \"flavors\": [\"Chocolate Fudge\", \"Vanilla Cream\"],\n  \"imageUrl\": \"https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api", "products"] },
+            "description": "Creates a new product. Requires admin token."
+          }
+        },
+        {
+          "name": "PUT - Full Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Whey Protein Gold Standard 2 lbs\",\n  \"description\": \"The world's best-selling whey protein. 24g of protein per serving.\",\n  \"price\": 49.99,\n  \"stock\": 200,\n  \"categoryId\": 1,\n  \"brand\": \"Optimum Nutrition\",\n  \"weight\": 907,\n  \"flavors\": [\"Chocolate\", \"Vanilla\", \"Strawberry\", \"Banana\"],\n  \"imageUrl\": \"https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=300&fit=crop\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/products/1", "host": ["{{baseUrl}}"], "path": ["api", "products", "1"] },
+            "description": "Full replacement update of product ID 1. All fields are overwritten."
+          }
+        },
+        {
+          "name": "PATCH - Partial Update Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 54.99,\n  \"stock\": 180\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/products/1", "host": ["{{baseUrl}}"], "path": ["api", "products", "1"] },
+            "description": "Partial update — only price and stock are changed. Other fields remain untouched."
+          }
+        },
+        {
+          "name": "DELETE - Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/products/24", "host": ["{{baseUrl}}"], "path": ["api", "products", "24"] },
+            "description": "Deletes product with ID 24. Requires admin token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "GET - List All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] },
+            "description": "Returns all orders. Admin sees all; regular users see only their own."
+          }
+        },
+        {
+          "name": "GET - Filter Orders by Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?status=pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"],
+              "query": [{ "key": "status", "value": "pending" }]
+            },
+            "description": "Returns only orders with status 'pending'. Valid values: pending, confirmed, shipped, delivered, cancelled."
+          }
+        },
+        {
+          "name": "GET - Find Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1"] },
+            "description": "Returns a single order by its ID."
+          }
+        },
+        {
+          "name": "POST - Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Carlos García\",\n  \"customerEmail\": \"carlos@example.com\",\n  \"shippingAddress\": \"Calle Mayor 10, Madrid, España\",\n  \"notes\": \"Please leave at the door.\",\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 2, \"unitPrice\": 59.99 },\n    { \"productId\": 4, \"quantity\": 1, \"unitPrice\": 19.99 }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] },
+            "description": "Creates a new order. Requires authentication (admin or user)."
+          }
+        },
+        {
+          "name": "PUT - Full Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Carlos García López\",\n  \"customerEmail\": \"carlos.garcia@example.com\",\n  \"shippingAddress\": \"Avenida Diagonal 100, Barcelona, España\",\n  \"status\": \"confirmed\",\n  \"notes\": \"Ring the bell twice.\",\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 2, \"unitPrice\": 59.99 },\n    { \"productId\": 4, \"quantity\": 1, \"unitPrice\": 19.99 }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/orders/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1"] },
+            "description": "Full replacement update of order ID 1. Requires admin token."
+          }
+        },
+        {
+          "name": "PATCH - Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/orders/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1"] },
+            "description": "Partial update — only the status field is changed. Valid values: pending, confirmed, shipped, delivered, cancelled."
+          }
+        },
+        {
+          "name": "DELETE - Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/1", "host": ["{{baseUrl}}"], "path": ["api", "orders", "1"] },
+            "description": "Deletes order with ID 1. Requires admin token."
+          }
+        }
+      ]
+    }
+  ]
+}
