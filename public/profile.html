@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — SportSupps Store</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .profile-card {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .avatar-wrap {
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      display: block;
+    }
+    .avatar-placeholder {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 3px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .profile-info { flex: 1; }
+    .profile-name { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .profile-meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+    @media (max-width: 600px) {
+      .profile-card { flex-direction: column; align-items: center; text-align: center; }
+      .profile-meta { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">Sport<span>Supps</span></a>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/categories.html" class="nav-link">Categories</a>
+        <a href="/products.html" class="nav-link">Products</a>
+        <a href="/orders.html" class="nav-link">Orders</a>
+        <a href="/users.html" class="nav-link admin-only">Users</a>
+        <a href="/profile.html" class="nav-link active auth-only">Profile</a>
+      </div>
+      <div id="navUser"></div>
+    </div>
+  </nav>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Edit modal (admin editing another user) -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Edit User</span>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="form-group">
+          <label class="form-label">Avatar URL</label>
+          <input type="text" id="editAvatar" class="form-control" placeholder="https://..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" id="editName" class="form-control" />
+          <span class="form-error" id="editNameError">Name must be at least 2 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input type="text" id="editUsername" class="form-control" />
+          <span class="form-error" id="editUsernameError">Username must be at least 3 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" id="editPassword" class="form-control" placeholder="Leave blank to keep current" />
+          <span class="form-hint">Leave empty to keep the current password.</span>
+          <span class="form-error" id="editPasswordError">Password must be at least 4 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="editRole" class="form-control">
+            <option value="user">user</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveModal()">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- ── My Profile ──────────────────────────────────────────────────── -->
+      <div class="page-header">
+        <h1>My <span>Profile</span></h1>
+      </div>
+
+      <!-- Profile summary card -->
+      <div class="profile-card" id="profileCard">
+        <div class="avatar-wrap">
+          <div class="avatar-placeholder" id="avatarPlaceholder">👤</div>
+          <img id="avatarImg" class="avatar" src="" alt="Avatar" style="display:none;" onerror="this.style.display='none';document.getElementById('avatarPlaceholder').style.display='flex';" />
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-meta">
+            <span id="profileUsername"></span>
+            <span id="profileRole"></span>
+            <span id="profileSince"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit own profile form -->
+      <div class="panel" style="margin-bottom:40px;">
+        <div class="panel-header"><span class="panel-title">✏️ Edit My Profile</span></div>
+        <div class="panel-body">
+          <form id="editProfileForm" novalidate>
+            <div class="grid-2">
+              <div>
+                <div class="form-group">
+                  <label class="form-label">Name</label>
+                  <input type="text" id="myName" class="form-control" placeholder="Full name" />
+                  <span class="form-error" id="myNameError">Name must be at least 2 characters.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <input type="text" id="myUsername" class="form-control" placeholder="username" />
+                  <span class="form-error" id="myUsernameError">Username must be at least 3 characters.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input type="password" id="myPassword" class="form-control" placeholder="Leave blank to keep current" />
+                  <span class="form-hint">Leave empty to keep your current password.</span>
+                  <span class="form-error" id="myPasswordError">Password must be at least 4 characters.</span>
+                </div>
+              </div>
+              <div>
+                <div class="form-group">
+                  <label class="form-label">Avatar URL</label>
+                  <input type="text" id="myAvatar" class="form-control" placeholder="https://example.com/photo.jpg" oninput="previewAvatar(this.value)" />
+                  <span class="form-hint">Paste a direct image URL.</span>
+                </div>
+                <div style="margin-top:12px;text-align:center;">
+                  <div class="avatar-placeholder" id="previewPlaceholder" style="margin:0 auto;">👤</div>
+                  <img id="previewImg" src="" alt="" style="display:none;width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);margin:0 auto;"
+                       onerror="this.style.display='none';document.getElementById('previewPlaceholder').style.display='flex';" />
+                  <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Preview</p>
+                </div>
+              </div>
+            </div>
+            <div class="btn-group" style="margin-top:8px;">
+              <button type="submit" class="btn btn-primary">Save changes</button>
+              <button type="button" class="btn btn-ghost" onclick="resetProfileForm()">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── Admin: All Users ────────────────────────────────────────────── -->
+      <div id="adminSection" style="display:none;">
+        <div class="page-header" style="margin-top:20px;">
+          <h2>All <span>Users</span></h2>
+          <p>Edit or remove any user account.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">User Registry</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadAllUsers()">↻ Refresh</button>
+          </div>
+          <div id="usersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:20px;">
+            <div style="text-align:center;padding:40px;grid-column:1/-1;"><span class="spinner"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      SportSupps Store · <span>Distributed Systems</span> · University Project
+    </div>
+  </footer>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentUser = null;
+    let allUsersCache = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth()) return;
+      renderNavAuth();
+      applyRoleUI();
+
+      currentUser = getUser();
+      await loadMyProfile();
+
+      if (isAdmin()) {
+        document.getElementById('adminSection').style.display = '';
+        await loadAllUsers();
+      }
+
+      document.getElementById('editProfileForm').addEventListener('submit', saveMyProfile);
+    });
+
+    // ── Load & display own profile ──────────────────────────────────────────
+
+    async function loadMyProfile() {
+      const { ok, data } = await apiFetch('/api/auth/me');
+      if (!ok) return;
+      const u = data.user;
+      currentUser = u;
+      renderProfileCard(u);
+      document.getElementById('myName').value = u.name || '';
+      document.getElementById('myUsername').value = u.username || '';
+      document.getElementById('myAvatar').value = u.avatarUrl || '';
+      previewAvatar(u.avatarUrl || '');
+    }
+
+    function renderProfileCard(u) {
+      document.getElementById('profileName').textContent = u.name || u.username;
+      document.getElementById('profileUsername').textContent = '@' + u.username;
+      document.getElementById('profileRole').innerHTML = `<span class="badge ${u.role === 'admin' ? 'badge-green' : 'badge-blue'}">${u.role}</span>`;
+      document.getElementById('profileSince').textContent = 'Since ' + formatDate(u.createdAt || '');
+      setAvatar(u.avatarUrl || '', 'avatarImg', 'avatarPlaceholder');
+    }
+
+    function setAvatar(url, imgId, placeholderId) {
+      const img = document.getElementById(imgId);
+      const ph  = document.getElementById(placeholderId);
+      if (url) {
+        img.src = url;
+        img.style.display = 'block';
+        ph.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        ph.style.display = 'flex';
+      }
+    }
+
+    function previewAvatar(url) {
+      setAvatar(url, 'previewImg', 'previewPlaceholder');
+    }
+
+    // ── Save own profile ────────────────────────────────────────────────────
+
+    async function saveMyProfile(e) {
+      e.preventDefault();
+      clearFormErrors('editProfileForm');
+
+      const name     = document.getElementById('myName').value.trim();
+      const username = document.getElementById('myUsername').value.trim();
+      const password = document.getElementById('myPassword').value;
+      const avatarUrl = document.getElementById('myAvatar').value.trim();
+
+      let valid = true;
+      if (name && name.length < 2)     { markError('myName', 'myNameError'); valid = false; }
+      if (username && username.length < 3) { markError('myUsername', 'myUsernameError'); valid = false; }
+      if (password && password.length < 4) { markError('myPassword', 'myPasswordError'); valid = false; }
+      if (!valid) return;
+
+      const body = {};
+      if (name)      body.name = name;
+      if (username)  body.username = username;
+      if (password)  body.password = password;
+      body.avatarUrl = avatarUrl;
+
+      const { ok, data } = await apiFetch(`/api/auth/users/${currentUser.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+
+      if (ok) {
+        showToast('Profile updated!', 'success');
+        document.getElementById('myPassword').value = '';
+        await loadMyProfile();
+      } else {
+        showToast(data.error || 'Update failed.', 'error');
+      }
+    }
+
+    function resetProfileForm() {
+      document.getElementById('myPassword').value = '';
+      document.getElementById('myName').value = currentUser?.name || '';
+      document.getElementById('myUsername').value = currentUser?.username || '';
+      document.getElementById('myAvatar').value = currentUser?.avatarUrl || '';
+      previewAvatar(currentUser?.avatarUrl || '');
+      clearFormErrors('editProfileForm');
+    }
+
+    // ── Admin: load all users ───────────────────────────────────────────────
+
+    async function loadAllUsers() {
+      const grid = document.getElementById('usersGrid');
+      grid.innerHTML = `<div style="text-align:center;padding:40px;grid-column:1/-1;"><span class="spinner"></span></div>`;
+
+      const { ok, data } = await apiFetch('/api/auth/users');
+      if (!ok) {
+        grid.innerHTML = `<p style="color:var(--red);padding:20px;">${escHtml(data.error)}</p>`;
+        return;
+      }
+
+      allUsersCache = data.data || [];
+      if (!allUsersCache.length) {
+        grid.innerHTML = `<div style="text-align:center;padding:40px;grid-column:1/-1;"><div style="font-size:48px;">👤</div><h3>No users</h3></div>`;
+        return;
+      }
+
+      grid.innerHTML = allUsersCache.map(u => `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+          <div style="background:var(--surface-2);padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+            ${u.avatarUrl
+              ? `<img src="${escHtml(u.avatarUrl)}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);" onerror="this.outerHTML='<div style=\'width:72px;height:72px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:32px;\'>👤</div>'">`
+              : `<div style="width:72px;height:72px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>`
+            }
+            <div style="text-align:center;">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;">${escHtml(u.name)}</div>
+              <div style="font-size:13px;color:var(--text-muted);">@${escHtml(u.username)}</div>
+            </div>
+            <span class="badge ${u.role === 'admin' ? 'badge-green' : 'badge-blue'}">${u.role}</span>
+          </div>
+          <div style="padding:14px 16px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);">
+            Registered: ${formatDate(u.createdAt)}
+          </div>
+          <div style="padding:0 16px 14px;display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="openEdit(${u.id})">Edit</button>
+            ${u.id !== currentUser.id
+              ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${escHtml(u.username)}')">Delete</button>`
+              : `<span style="font-size:11px;color:var(--text-faint);align-self:center;padding-left:4px;">(you)</span>`
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Admin: edit modal ───────────────────────────────────────────────────
+
+    function openEdit(id) {
+      const u = allUsersCache.find(x => x.id === id);
+      if (!u) return;
+
+      document.getElementById('editId').value = u.id;
+      document.getElementById('modalTitle').textContent = `Edit ${escHtml(u.name)} (#${u.id})`;
+      document.getElementById('editAvatar').value = u.avatarUrl || '';
+      document.getElementById('editName').value = u.name || '';
+      document.getElementById('editUsername').value = u.username || '';
+      document.getElementById('editPassword').value = '';
+      document.getElementById('editRole').value = u.role || 'user';
+      clearFormErrors('editModal');
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    async function saveModal() {
+      clearFormErrors('editModal');
+      const id       = document.getElementById('editId').value;
+      const name     = document.getElementById('editName').value.trim();
+      const username = document.getElementById('editUsername').value.trim();
+      const password = document.getElementById('editPassword').value;
+      const avatarUrl = document.getElementById('editAvatar').value.trim();
+      const role     = document.getElementById('editRole').value;
+
+      let valid = true;
+      if (!name)     { markError('editName', 'editNameError'); valid = false; }
+      if (!username) { markError('editUsername', 'editUsernameError'); valid = false; }
+      if (password && password.length < 4) { markError('editPassword', 'editPasswordError'); valid = false; }
+      if (!valid) return;
+
+      const body = { name, username, role, avatarUrl };
+      if (password) body.password = password;
+
+      const { ok, data } = await apiFetch(`/api/auth/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body),
+      });
+
+      if (ok) {
+        showToast('User updated!', 'success');
+        closeModal();
+        await loadAllUsers();
+        // Refresh own card if admin edited themselves
+        if (Number(id) === currentUser.id) await loadMyProfile();
+      } else {
+        showToast(data.error || 'Update failed.', 'error');
+      }
+    }
+
+    // ── Admin: delete user ──────────────────────────────────────────────────
+
+    async function deleteUser(id, username) {
+      if (!confirm(`Delete user "${username}" (#${id})? This cannot be undone.`)) return;
+      const { ok, data } = await apiFetch(`/api/auth/users/${id}`, { method: 'DELETE' });
+      if (ok) {
+        showToast(`User "${username}" deleted.`, 'success');
+        await loadAllUsers();
+      } else {
+        showToast(data.error || 'Delete failed.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
