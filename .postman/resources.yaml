@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 4c3c75cc-078d-419c-8a3c-bca94b505521
+
+localResources:
+  collections:
+    - ..\SportSupps_Postman_Collection.json
