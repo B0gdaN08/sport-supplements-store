@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../Distribuidos/mnt/user-data/outputs/sport-supplements-store"
+		},
+		{
+			"path": "../Distribuidos/node_modules"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}

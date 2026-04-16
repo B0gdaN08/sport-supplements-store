@@ -1,7 +1,7 @@
 package com.sportsupps.store.config;
 
 import com.sportsupps.store.security.JwtAuthFilter;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -49,31 +50,36 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 // Public auth endpoints
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/login")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/register")).permitAll()
                 // Public read endpoints
-                .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", HttpMethod.GET.name())).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", HttpMethod.GET.name())).permitAll()
                 // Orders GET is optional-auth (handled in controller)
-                .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/orders/**", HttpMethod.GET.name())).permitAll()
                 // Admin-only: user management write ops
-                .requestMatchers(HttpMethod.PUT, "/api/auth/users/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.DELETE, "/api/auth/users/**").hasAuthority("admin")
-                .requestMatchers("/api/auth/users").hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/users/**", HttpMethod.PUT.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/users/**", HttpMethod.DELETE.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/auth/users")).hasAuthority("admin")
                 // Admin-only: categories write
-                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.PATCH, "/api/categories/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", HttpMethod.POST.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", HttpMethod.PUT.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", HttpMethod.PATCH.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", HttpMethod.DELETE.name())).hasAuthority("admin")
                 // Admin-only: products write
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", HttpMethod.POST.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", HttpMethod.PUT.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", HttpMethod.PATCH.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", HttpMethod.DELETE.name())).hasAuthority("admin")
                 // Admin-only: orders write
-                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAuthority("admin")
-                .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/orders/**", HttpMethod.PUT.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/orders/**", HttpMethod.PATCH.name())).hasAuthority("admin")
+                .requestMatchers(new AntPathRequestMatcher("/api/orders/**", HttpMethod.DELETE.name())).hasAuthority("admin")
                 // Static resources
-                .requestMatchers("/", "/*.html", "/css/**", "/js/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/*.html")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
                 // Everything else requires auth
                 .anyRequest().authenticated()
             )
