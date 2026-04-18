@@ -58,18 +58,18 @@ function renderCardsBlogs(blogs, ok, data){
 }
 
 async function viewBlog(id){
-     // 1. Ocultar el grid y el header
+
         const grid = document.getElementById('blogsGrid');
         const header = document.querySelector('.page-header');
 
         grid.style.display = 'none';
         header.style.display = 'none';
 
-        // 2. Mostrar el contenedor de detalle
+
         const blogDetail = document.getElementById('blog-detail');
         blogDetail.style.display = 'block';
 
-        // 3. Mostrar loading mientras carga
+
         blogDetail.innerHTML = `
             <div style="text-align:center;padding:60px;">
                 <span class="spinner"></span>
@@ -77,7 +77,6 @@ async function viewBlog(id){
             </div>
         `;
 
-        // 4. Obtener el blog completo desde el backend
         try {
             const {ok, data} = await apiFetch(`/api/blogs/${id}`);
 
@@ -138,15 +137,14 @@ function showCompleteBlog(blog){
 }
 
 function returnList(){
-    // 1. Mostrar el grid y el header
+
         const grid = document.getElementById('blogsGrid');
         const header = document.querySelector('.page-header');
 
         grid.style.display = '';
         header.style.display = '';
 
-        // 2. Ocultar el detalle
         const blogDetail = document.getElementById('blog-detail');
         blogDetail.style.display = 'none';
-        blogDetail.innerHTML = ''; // Limpiar contenido
+        blogDetail.innerHTML = '';
 }
