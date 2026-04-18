@@ -57,26 +57,96 @@ function renderCardsBlogs(blogs, ok, data){
         `).join('');
 }
 
-async function viewBlog(){
-    try {
-            const { ok, data } = await apiFetch(`/api/blogs/${id}`);
+async function viewBlog(id){
+     // 1. Ocultar el grid y el header
+        const grid = document.getElementById('blogsGrid');
+        const header = document.querySelector('.page-header');
+
+        grid.style.display = 'none';
+        header.style.display = 'none';
+
+        // 2. Mostrar el contenedor de detalle
+        const blogDetail = document.getElementById('blog-detail');
+        blogDetail.style.display = 'block';
+
+        // 3. Mostrar loading mientras carga
+        blogDetail.innerHTML = `
+            <div style="text-align:center;padding:60px;">
+                <span class="spinner"></span>
+                <p>Cargando blog...</p>
+            </div>
+        `;
+
+        // 4. Obtener el blog completo desde el backend
+        try {
+            const {ok, data} = await apiFetch(`/api/blogs/${id}`);
 
             if (!ok) {
-                alert('Error: ' + (data.error || 'Blog no encontrado'));
+                blogDetail.innerHTML = `
+                    <div style="text-align:center;padding:60px;">
+                        <p style="color:var(--red);">❌ Error: ${data.error || 'Blog no encontrado'}</p>
+                        <button onclick="returnList()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">← Volver</button>
+                    </div>
+                `;
                 return;
             }
 
             const blog = data.data;
-
-            // Guardar el blog en localStorage para mostrarlo en otra página
-            localStorage.setItem('selectedBlog', JSON.stringify(blog));
-
-            // Redirigir a la página de detalle
-            window.location.href = '/blog-detail.html';
+            showCompleteBlog(blog);
 
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al cargar el blog');
+            blogDetail.innerHTML = `
+                <div style="text-align:center;padding:60px;">
+                    <p style="color:var(--red);">❌ Error de conexión</p>
+                    <button onclick="returnList()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">← Volver</button>
+                </div>
+            `;
         }
+}
 
+function showCompleteBlog(blog){
+    const blogDetail = document.getElementById('blog-detail');
+
+        blogDetail.innerHTML = `
+            <div style="max-width:800px; margin:0 auto; padding:40px 20px;">
+                /*<button onclick="returnList()" style="margin-bottom:30px; padding:10px 20px; cursor:pointer; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+                    ← Volver a todos los blogs
+                </button>*/
+
+                <button onclick="returnList()" class="btn btn-primary" >
+                                    ← Volver a todos los blogs
+                                </button>
+
+                <h1 style="font-size:2.5rem; margin-bottom:20px;">${escHtml(blog.title)}</h1>
+
+                ${blog.imageUrl && blog.imageUrl !== ""
+                    ? `<img src="${escHtml(blog.imageUrl)}" alt="${escHtml(blog.title)}" style="width:100%; max-height:400px; object-fit:cover; border-radius:12px; margin:20px 0;">`
+                    : ''
+                }
+
+                <div style="color:var(--text-muted); margin-bottom:30px;">
+                    📅 ${blog.createdAt ? blog.createdAt.split('T')[0] : 'Fecha no disponible'}
+                </div>
+
+                <div style="line-height:1.8; font-size:1.1rem;">
+                    ${escHtml(blog.description).replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        `;
+
+}
+
+function returnList(){
+    // 1. Mostrar el grid y el header
+        const grid = document.getElementById('blogsGrid');
+        const header = document.querySelector('.page-header');
+
+        grid.style.display = '';
+        header.style.display = '';
+
+        // 2. Ocultar el detalle
+        const blogDetail = document.getElementById('blog-detail');
+        blogDetail.style.display = 'none';
+        blogDetail.innerHTML = ''; // Limpiar contenido
 }
