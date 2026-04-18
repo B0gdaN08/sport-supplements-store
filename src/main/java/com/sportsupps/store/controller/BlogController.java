@@ -40,10 +40,10 @@ public class BlogController {
             return ResponseEntity.badRequest().body(ApiResponse.error("\"description\" is required"));
 
        if(!body.containsKey("imageUrl")){
-            Blog b= Blog.builder().title(body.get("title").toString()).description(body.get("description").toString()).build();
+            Blog b= Blog.builder().title(title.trim()).description((String) body.get("description")).build();
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(repo.save(b)));
        }else{
-           Blog b= Blog.builder().title(body.get("title").toString()).description(body.get("description").toString()).imageUrl(body.get("imageUrl").toString()).build();
+           Blog b= Blog.builder().title(title.trim()).description((String) body.get("description")).imageUrl((String) body.get("imageUrl")).build();
            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(repo.save(b)));
        }
     }
