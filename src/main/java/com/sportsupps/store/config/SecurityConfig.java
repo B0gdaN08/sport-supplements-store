@@ -49,6 +49,11 @@ public class SecurityConfig {
                 })
             )
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.GET.name())).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.POST.name())).hasAuthority("admin")
+                    .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.PUT.name())).hasAuthority("admin")
+                    .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.PATCH.name())).hasAuthority("admin")
+                    .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.DELETE.name())).hasAuthority("admin")
                 // Public auth endpoints
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/register")).permitAll()
