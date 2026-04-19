@@ -45,7 +45,7 @@ function renderCardsBlogs(blogs, ok, data){
                 onmouseover="this.style.borderColor='rgba(180,255,60,0.25)'"
                 onmouseout="this.style.borderColor='var(--border)'">
                 ${blog.imageUrl && blog.imageUrl !== ""
-                    ? `<img src="${escHtml(blog.imageUrl)}" alt="${escHtml(blog.title)}" style="width:100%; height:200px; object-fit:cover;">`
+                    ? `<img src="${escHtml(blog.imageUrl)}" alt="${escHtml(blog.title)}" style="width:100%; object-fit:cover;">`
                     : `<div style="height:200px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:48px;">📖</div>`
                 }
                 <div style="padding:20px;">
@@ -109,12 +109,9 @@ function showCompleteBlog(blog){
 
         blogDetail.innerHTML = `
             <div style="max-width:800px; margin:0 auto; padding:40px 20px;">
-                /*<button onclick="returnList()" style="margin-bottom:30px; padding:10px 20px; cursor:pointer; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
-                    ← Volver a todos los blogs
-                </button>*/
 
                 <button onclick="returnList()" class="btn btn-primary" >
-                                    ← Volver a todos los blogs
+                                    ← See all blogs
                                 </button>
 
                 <h1 style="font-size:2.5rem; margin-bottom:20px;">${escHtml(blog.title)}</h1>
