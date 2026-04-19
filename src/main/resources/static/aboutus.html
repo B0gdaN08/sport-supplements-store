@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us — SportSupps</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-inner">
+        <a href="/" class="navbar-brand">Sport<span>Supps</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/categories.html" class="nav-link">Categories</a>
+            <a href="/products.html" class="nav-link">Products</a>
+            <a href="/orders.html" class="nav-link">Orders</a>
+            <a href="/aboutus.html" class="nav-link active">About Us</a>
+            <a href="/users.html" class="nav-link admin-only">Users</a>
+            <a href="/profile.html" class="nav-link auth-only">Profile</a>
+        </div>
+        <div id="navUser"></div>
+    </div>
+</nav>
+
+<!-- CONTENIDO -->
+<main>
+    <div class="container">
+
+        <!-- TÍTULO -->
+        <div class="page-header">
+            <h1>About <span>Us</span></h1>
+            <p>Learn more about our project and team.</p>
+        </div>
+
+        <!-- PROYECTO -->
+        <section class="panel" style="margin-bottom: 30px;">
+            <div class="panel-header">
+                <span class="panel-title">The Project</span>
+            </div>
+            <div class="panel-body">
+                <p>
+                    SportSupps Store is a university project developed for the Distributed Systems course.
+                    It simulates a real e-commerce platform where users can browse supplements, manage
+                    categories and place orders through a REST API.
+                </p>
+            </div>
+        </section>
+
+        <!-- FUNCIONALIDADES -->
+        <section class="panel" style="margin-bottom: 30px;">
+            <div class="panel-header">
+                <span class="panel-title">Features</span>
+            </div>
+            <div class="panel-body">
+                <ul style="padding-left: 18px;">
+                    <li>Product, category and order management</li>
+                    <li>Full CRUD operations</li>
+                    <li>REST API architecture</li>
+                    <li>User authentication and roles</li>
+                    <li>Frontend connected to backend services</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- TECNOLOGÍAS -->
+        <section class="panel" style="margin-bottom: 30px;">
+            <div class="panel-header">
+                <span class="panel-title">Technologies</span>
+            </div>
+            <div class="panel-body">
+                <p><strong>Frontend:</strong> HTML, CSS, JavaScript</p>
+                <p><strong>Backend:</strong> Java (Spring Boot)</p>
+                <p><strong>Architecture:</strong> REST API</p>
+                <p><strong>Storage:</strong> In-memory repository</p>
+            </div>
+        </section>
+
+        <!-- EQUIPO -->
+        <section class="panel">
+            <div class="panel-header">
+                <span class="panel-title">Team</span>
+            </div>
+            <div class="panel-body">
+
+                <div class="grid-3">
+
+                    <div class="panel">
+                        <div class="panel-body">
+                            <h3>ÁLVARO BRUNO RAMÍREZ ARMIJOS</h3>
+                            <p>Frontend fixes and improvements (categories, UI adjustments) + backend review</p>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-body">
+                            <h3>DANIEL RODRIGUEZ BURITICA</h3>
+                            <p>Frontend (UI, footer, product images, About page) + testing and validation of features</p>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-body">
+                            <h3>BOGDAN IONUT MARAN</h3>
+                            <p>Backend development, Spring Boot migration and core system implementation</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <h3>SportSupps Store</h3>
+            <p>Premium supplements for strength and performance.</p>
+        </div>
+
+        <div class="footer-column">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="/products.html">Products</a></li>
+                <li><a href="/categories.html">Categories</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Account</h4>
+            <ul>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/profile.html">Profile</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Contact</h4>
+            <ul>
+                <li>Email: support@sportsupps.com</li>
+                <li>Madrid, Spain</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="container footer-bottom-content">
+            <p>© 2026 SportSupps Store</p>
+        </div>
+    </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="/js/utils.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+    renderNavAuth();
+    applyRoleUI();
+</script>
+
+</body>
+</html>
