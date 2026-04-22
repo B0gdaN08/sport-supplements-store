@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -42,10 +43,30 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id) {
-        return repo.findById(id)
+    public ResponseEntity<?> getById(@PathVariable Integer id, @AuthenticationPrincipal AuthUser authUser) {
+        if(authUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized access"));
+        }
+        Optional<Order> o = repo.findById(id);
+        if (o.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found."));
+        }
+        Order order = o.get();
+        Integer orderOwner = order.getUserId();
+
+        if(!authUser.isAdmin()) {
+
+            Integer authUserId = authUser.getId();
+
+            if (!Objects.equals(orderOwner, authUserId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("You don't have permission to view this order."));
+            }
+        }
+        return ResponseEntity.ok(ApiResponse.ok(order));
+        /*return repo.findById(id)
                 .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));*/
     }
 
     @PostMapping
