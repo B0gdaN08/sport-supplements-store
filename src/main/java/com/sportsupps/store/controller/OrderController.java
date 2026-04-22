@@ -3,7 +3,9 @@ package com.sportsupps.store.controller;
 import com.sportsupps.store.dto.ApiResponse;
 import com.sportsupps.store.model.Order;
 import com.sportsupps.store.model.OrderItem;
+import com.sportsupps.store.model.Product;
 import com.sportsupps.store.repository.OrderRepository;
+import com.sportsupps.store.repository.ProductRepository;
 import com.sportsupps.store.security.AuthUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +23,12 @@ public class OrderController {
     private static final List<String> VALID_STATUSES = List.of("pending", "confirmed", "shipped", "delivered", "cancelled");
 
     private final OrderRepository repo;
+    private final ProductRepository productRepo;
 
-    public OrderController(OrderRepository repo) { this.repo = repo; }
+    public OrderController(OrderRepository repo, ProductRepository productRepo) {
+        this.repo = repo;
+        this.productRepo = productRepo;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(required = false) String status,
@@ -54,6 +60,16 @@ public class OrderController {
                 toInt(i.get("productId")), toInt(i.get("quantity")), toDouble(i.get("unitPrice"))
         )).toList();
 
+        for (OrderItem item : items) {
+            Optional<Product> productOpt = productRepo.findById(item.getProductId());
+            if (productOpt.isEmpty())
+                return ResponseEntity.badRequest().body(ApiResponse.error("Product #" + item.getProductId() + " not found."));
+            Product product = productOpt.get();
+            if (product.getStock() != null && product.getStock() < item.getQuantity())
+                return ResponseEntity.badRequest().body(ApiResponse.error(
+                        "Not enough stock for \"" + product.getName() + "\". Available: " + product.getStock() + "."));
+        }
+
         double total = items.stream().mapToDouble(i -> i.getQuantity() * i.getUnitPrice()).sum();
         total = Math.round(total * 100.0) / 100.0;
 
@@ -65,7 +81,20 @@ public class OrderController {
                 .shippingAddress((String) body.getOrDefault("shippingAddress", ""))
                 .notes((String) body.getOrDefault("notes", ""))
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(repo.save(o)));
+        Order saved = repo.save(o);
+
+        for (OrderItem item : items) {
+            Optional<Product> productOpt = productRepo.findById(item.getProductId());
+            if (productOpt.isPresent()) {
+                Product product = productOpt.get();
+                if (product.getStock() != null) {
+                    product.setStock(product.getStock() - item.getQuantity());
+                    productRepo.save(product);
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
 
     @PutMapping("/{id}")

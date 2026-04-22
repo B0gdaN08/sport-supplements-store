@@ -285,7 +285,8 @@ function renderShop() {
 
   grid.innerHTML = products.map(p => {
     const inCart = cart[p.id]?.quantity || 0;
-    const outOfStock = p.stock === 0;
+    const outOfStock = p.stock !== null && p.stock !== undefined && p.stock === 0;
+    const atStockLimit = p.stock !== null && p.stock !== undefined && inCart >= p.stock;
 
     let actionHtml;
     if (outOfStock) {
@@ -299,7 +300,7 @@ function renderShop() {
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty(${p.id}, -1)" ${inCart === 0 ? 'disabled' : ''}>−</button>
           <span class="qty-value" id="qty-${p.id}">${inCart}</span>
-          <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+          <button class="qty-btn" onclick="changeQty(${p.id}, 1)" ${atStockLimit ? 'disabled' : ''}>+</button>
         </div>
         <button class="btn btn-primary btn-sm" onclick="addToCart(${p.id})" ${inCart > 0 ? 'style="background:var(--accent-dim)"' : ''}>
           ${inCart > 0 ? '✓ In Cart' : 'Add'}
@@ -337,9 +338,11 @@ function renderShop() {
 
 function changeQty(productId, delta) {
   const current = cart[productId]?.quantity || 0;
-  const newQty = Math.max(0, current + delta);
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
+
+  const maxQty = (product.stock !== null && product.stock !== undefined) ? product.stock : Infinity;
+  const newQty = Math.min(maxQty, Math.max(0, current + delta));
 
   if (newQty === 0) delete cart[productId];
   else cart[productId] = { product, quantity: newQty };
@@ -351,6 +354,8 @@ function changeQty(productId, delta) {
 function addToCart(productId) {
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
+  const inCart = cart[productId]?.quantity || 0;
+  if (product.stock !== null && product.stock !== undefined && inCart >= product.stock) return;
   if (!cart[productId]) cart[productId] = { product, quantity: 1 };
   updateCartBar();
   renderShop();
@@ -421,9 +426,9 @@ async function submitCheckout() {
     showToast(`Order #${data.data.id} placed! Total: €${data.data.total.toFixed(2)}`, 'success', 5000);
     cart = {};
     updateCartBar();
-    renderShop();
     closeCheckout();
     document.getElementById('checkoutForm').reset();
+    loadShop();
   } else {
     showToast(data.error || 'Failed to place order.', 'error');
   }
