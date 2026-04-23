@@ -3,10 +3,8 @@ package com.sportsupps.store.controller;
 import com.sportsupps.store.dto.ApiResponse;
 import com.sportsupps.store.model.Order;
 import com.sportsupps.store.model.OrderItem;
-import com.sportsupps.store.model.Product;
-import com.sportsupps.store.repository.OrderRepository;
-import com.sportsupps.store.repository.ProductRepository;
 import com.sportsupps.store.security.AuthUser;
+import com.sportsupps.store.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -23,50 +19,25 @@ public class OrderController {
 
     private static final List<String> VALID_STATUSES = List.of("pending", "confirmed", "shipped", "delivered", "cancelled");
 
-    private final OrderRepository repo;
-    private final ProductRepository productRepo;
+    private final OrderService service;
 
-    public OrderController(OrderRepository repo, ProductRepository productRepo) {
-        this.repo = repo;
-        this.productRepo = productRepo;
-    }
+    public OrderController(OrderService service) { this.service = service; }
 
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(required = false) String status,
                                     @AuthenticationPrincipal AuthUser authUser) {
-        if (authUser == null) {
+        if (authUser == null)
             return ResponseEntity.ok(ApiResponse.builder().success(true).count(0).data(List.of()).build());
-        }
         Integer userId = authUser.isAdmin() ? null : authUser.getId();
-        var list = repo.findAll(status, userId);
+        var list = service.findAll(status, userId);
         return ResponseEntity.ok(ApiResponse.builder().success(true).count(list.size()).data(list).build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id, @AuthenticationPrincipal AuthUser authUser) {
-        if(authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized access"));
-        }
-        Optional<Order> o = repo.findById(id);
-        if (o.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found."));
-        }
-        Order order = o.get();
-        Integer orderOwner = order.getUserId();
-
-        if(!authUser.isAdmin()) {
-
-            Integer authUserId = authUser.getId();
-
-            if (!Objects.equals(orderOwner, authUserId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(ApiResponse.error("You don't have permission to view this order."));
-            }
-        }
-        return ResponseEntity.ok(ApiResponse.ok(order));
-        /*return repo.findById(id)
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
+        return service.findById(id)
                 .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));*/
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));
     }
 
     @PostMapping
@@ -81,20 +52,10 @@ public class OrderController {
                 toInt(i.get("productId")), toInt(i.get("quantity")), toDouble(i.get("unitPrice"))
         )).toList();
 
-        for (OrderItem item : items) {
-            Optional<Product> productOpt = productRepo.findById(item.getProductId());
-            if (productOpt.isEmpty())
-                return ResponseEntity.badRequest().body(ApiResponse.error("Product #" + item.getProductId() + " not found."));
-            Product product = productOpt.get();
-            if (product.getStock() != null && product.getStock() < item.getQuantity())
-                return ResponseEntity.badRequest().body(ApiResponse.error(
-                        "Not enough stock for \"" + product.getName() + "\". Available: " + product.getStock() + "."));
-        }
-
         double total = items.stream().mapToDouble(i -> i.getQuantity() * i.getUnitPrice()).sum();
         total = Math.round(total * 100.0) / 100.0;
 
-        Order o = Order.builder()
+        Order order = Order.builder()
                 .userId(authUser != null ? authUser.getId() : null)
                 .customerName(customerName.trim())
                 .customerEmail((String) body.getOrDefault("customerEmail", ""))
@@ -102,43 +63,35 @@ public class OrderController {
                 .shippingAddress((String) body.getOrDefault("shippingAddress", ""))
                 .notes((String) body.getOrDefault("notes", ""))
                 .build();
-        Order saved = repo.save(o);
 
-        for (OrderItem item : items) {
-            Optional<Product> productOpt = productRepo.findById(item.getProductId());
-            if (productOpt.isPresent()) {
-                Product product = productOpt.get();
-                if (product.getStock() != null) {
-                    product.setStock(product.getStock() - item.getQuantity());
-                    productRepo.save(product);
-                }
-            }
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(service.create(order)));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(saved));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
-        Optional<Order> opt = repo.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found."));
-        Order o = opt.get();
-        if (body.containsKey("customerName"))    o.setCustomerName((String) body.get("customerName"));
-        if (body.containsKey("customerEmail"))   o.setCustomerEmail((String) body.get("customerEmail"));
-        if (body.containsKey("shippingAddress")) o.setShippingAddress((String) body.get("shippingAddress"));
-        if (body.containsKey("notes"))           o.setNotes((String) body.get("notes"));
-        if (body.containsKey("status")) {
-            String s = (String) body.get("status");
-            if (!VALID_STATUSES.contains(s)) return ResponseEntity.badRequest().body(ApiResponse.error("Invalid status."));
-            o.setStatus(s);
-        }
-        if (body.containsKey("items")) {
-            List<Map<String, Object>> rawItems = (List<Map<String, Object>>) body.get("items");
-            List<OrderItem> items = rawItems.stream().map(i -> new OrderItem(toInt(i.get("productId")), toInt(i.get("quantity")), toDouble(i.get("unitPrice")))).toList();
-            o.setItems(items);
-            o.setTotal(Math.round(items.stream().mapToDouble(i -> i.getQuantity() * i.getUnitPrice()).sum() * 100.0) / 100.0);
-        }
-        return ResponseEntity.ok(ApiResponse.ok(repo.save(o)));
+        return service.findById(id).map(o -> {
+            if (body.containsKey("customerName"))    o.setCustomerName((String) body.get("customerName"));
+            if (body.containsKey("customerEmail"))   o.setCustomerEmail((String) body.get("customerEmail"));
+            if (body.containsKey("shippingAddress")) o.setShippingAddress((String) body.get("shippingAddress"));
+            if (body.containsKey("notes"))           o.setNotes((String) body.get("notes"));
+            if (body.containsKey("status")) {
+                String s = (String) body.get("status");
+                if (!VALID_STATUSES.contains(s))
+                    return ResponseEntity.badRequest().body(ApiResponse.error("Invalid status."));
+                o.setStatus(s);
+            }
+            if (body.containsKey("items")) {
+                List<Map<String, Object>> rawItems = (List<Map<String, Object>>) body.get("items");
+                List<OrderItem> items = rawItems.stream().map(i -> new OrderItem(toInt(i.get("productId")), toInt(i.get("quantity")), toDouble(i.get("unitPrice")))).toList();
+                o.setItems(items);
+                o.setTotal(Math.round(items.stream().mapToDouble(i -> i.getQuantity() * i.getUnitPrice()).sum() * 100.0) / 100.0);
+            }
+            return ResponseEntity.ok(ApiResponse.ok(service.update(o)));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));
     }
 
     @PatchMapping("/{id}")
@@ -148,7 +101,7 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        if (!repo.deleteById(id))
+        if (!service.deleteById(id))
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found."));
         return ResponseEntity.ok(ApiResponse.deleted("Order #" + id + " deleted."));
     }

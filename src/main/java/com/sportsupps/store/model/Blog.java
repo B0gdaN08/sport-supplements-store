@@ -1,25 +1,25 @@
 package com.sportsupps.store.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "blogs")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Blog {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String title;
-    private String description;
-    @Builder.Default
-    private String imageUrl="";
-    @Builder.Default
-    private String createdAt= LocalDateTime.now() .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String imageUrl;
+    private String createdAt;
 }

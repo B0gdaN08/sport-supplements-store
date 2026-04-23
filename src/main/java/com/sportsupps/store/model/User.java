@@ -1,20 +1,29 @@
 package com.sportsupps.store.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "users")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(unique = true)
     private String username;
+
     private String password;
     private String name;
-    private String role;   // "admin" or "user"
+    private String role;
+
+    @Column(columnDefinition = "TEXT")
     private String avatarUrl;
+
     private String createdAt;
 }

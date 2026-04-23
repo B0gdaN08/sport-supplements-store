@@ -2,32 +2,31 @@ package com.sportsupps.store.controller;
 
 import com.sportsupps.store.dto.ApiResponse;
 import com.sportsupps.store.model.Product;
-import com.sportsupps.store.repository.ProductRepository;
+import com.sportsupps.store.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductRepository repo;
+    private final ProductService service;
 
-    public ProductController(ProductRepository repo) { this.repo = repo; }
+    public ProductController(ProductService service) { this.service = service; }
 
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(required = false) Integer categoryId) {
-        var list = repo.findAll(categoryId);
+        var list = service.findAll(categoryId);
         return ResponseEntity.ok(ApiResponse.builder().success(true).count(list.size()).data(list).build());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
-        return repo.findById(id)
+        return service.findById(id)
                 .map(p -> ResponseEntity.ok(ApiResponse.ok(p)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found.")));
     }
@@ -43,39 +42,38 @@ public class ProductController {
             return ResponseEntity.badRequest().body(ApiResponse.error("\"categoryId\" is required."));
 
         Product p = buildProduct(null, body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(repo.save(p)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(service.save(p)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
-        Optional<Product> opt = repo.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found."));
-        Product p = buildProduct(opt.get(), body);
-        p.setId(id);
-        p.setCreatedAt(opt.get().getCreatedAt());
-        return ResponseEntity.ok(ApiResponse.ok(repo.save(p)));
+        return service.findById(id).map(existing -> {
+            Product p = buildProduct(existing, body);
+            p.setId(id);
+            p.setCreatedAt(existing.getCreatedAt());
+            return ResponseEntity.ok(ApiResponse.ok(service.save(p)));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found.")));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patch(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
-        Optional<Product> opt = repo.findById(id);
-        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found."));
-        Product p = opt.get();
-        if (body.containsKey("name"))        p.setName(((String) body.get("name")).trim());
-        if (body.containsKey("description")) p.setDescription((String) body.get("description"));
-        if (body.containsKey("price"))       p.setPrice(toDouble(body.get("price")));
-        if (body.containsKey("stock"))       p.setStock(toInt(body.get("stock")));
-        if (body.containsKey("categoryId"))  p.setCategoryId(toInt(body.get("categoryId")));
-        if (body.containsKey("brand"))       p.setBrand((String) body.get("brand"));
-        if (body.containsKey("weight"))      p.setWeight(toInt(body.get("weight")));
-        if (body.containsKey("flavors"))     p.setFlavors(toStringList(body.get("flavors")));
-        if (body.containsKey("imageUrl"))    p.setImageUrl((String) body.get("imageUrl"));
-        return ResponseEntity.ok(ApiResponse.ok(repo.save(p)));
+        return service.findById(id).map(p -> {
+            if (body.containsKey("name"))        p.setName(((String) body.get("name")).trim());
+            if (body.containsKey("description")) p.setDescription((String) body.get("description"));
+            if (body.containsKey("price"))       p.setPrice(toDouble(body.get("price")));
+            if (body.containsKey("stock"))       p.setStock(toInt(body.get("stock")));
+            if (body.containsKey("categoryId"))  p.setCategoryId(toInt(body.get("categoryId")));
+            if (body.containsKey("brand"))       p.setBrand((String) body.get("brand"));
+            if (body.containsKey("weight"))      p.setWeight(toInt(body.get("weight")));
+            if (body.containsKey("flavors"))     p.setFlavors(toStringList(body.get("flavors")));
+            if (body.containsKey("imageUrl"))    p.setImageUrl((String) body.get("imageUrl"));
+            return ResponseEntity.ok(ApiResponse.ok(service.save(p)));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found.")));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
-        if (!repo.deleteById(id))
+        if (!service.deleteById(id))
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Product #" + id + " not found."));
         return ResponseEntity.ok(ApiResponse.deleted("Product #" + id + " deleted."));
     }

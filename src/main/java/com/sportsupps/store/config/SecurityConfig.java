@@ -48,7 +48,9 @@ public class SecurityConfig {
                     res.getWriter().write("{\"success\":false,\"error\":\"Access denied. Admin role required.\"}");
                 })
             )
+            .headers(h -> h.frameOptions().sameOrigin())
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.GET.name())).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.POST.name())).hasAuthority("admin")
                     .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.PUT.name())).hasAuthority("admin")
