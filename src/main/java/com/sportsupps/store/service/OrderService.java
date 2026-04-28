@@ -58,12 +58,62 @@ public class OrderService {
     }
 
     public Order update(Order order) {
+        Optional<Order> oldOpt = repo.findById(order.getId());
+
+        if (oldOpt.isPresent()) {
+            Order oldOrder = oldOpt.get();
+
+            boolean wasCancelled = "cancelled".equals(oldOrder.getStatus());
+            boolean nowCancelled = "cancelled".equals(order.getStatus());
+
+            // If is canceled → restore stock
+            if (!wasCancelled && nowCancelled) {
+                restoreStock(oldOrder);
+            }
+
+            // Update the real object
+            oldOrder.setStatus(order.getStatus());
+            oldOrder.setCustomerName(order.getCustomerName());
+            oldOrder.setCustomerEmail(order.getCustomerEmail());
+            oldOrder.setShippingAddress(order.getShippingAddress());
+            oldOrder.setNotes(order.getNotes());
+
+            return repo.save(oldOrder);
+        }
+
         return repo.save(order);
     }
 
     public boolean deleteById(Integer id) {
-        if (!repo.existsById(id)) return false;
+        Optional<Order> opt = repo.findById(id);
+        if (opt.isEmpty()) return false;
+        Order order = opt.get();
+        // If was cenceled the order, yet is restored the stock
+        if (!"cancelled".equals(order.getStatus())) {
+            restoreStock(order);
+        }
         repo.deleteById(id);
         return true;
+    }
+
+    public void restoreStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            productService.findById(item.getProductId()).ifPresent(product -> {
+                if (product.getStock() != null) {
+                    product.setStock(product.getStock() + item.getQuantity());
+                    productService.save(product);
+                }
+            });
+        }
+    }
+    public void reduceStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            productService.findById(item.getProductId()).ifPresent(product -> {
+                if (product.getStock() != null) {
+                    product.setStock(product.getStock() - item.getQuantity());
+                    productService.save(product);
+                }
+            });
+        }
     }
 }
