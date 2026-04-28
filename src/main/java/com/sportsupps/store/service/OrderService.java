@@ -87,12 +87,11 @@ public class OrderService {
     public boolean deleteById(Integer id) {
         Optional<Order> opt = repo.findById(id);
         if (opt.isEmpty()) return false;
-
         Order order = opt.get();
-
-        //Restore stock until to delete
-        restoreStock(order);
-
+        // If was cenceled the order, yet is restored the stock
+        if (!"cancelled".equals(order.getStatus())) {
+            restoreStock(order);
+        }
         repo.deleteById(id);
         return true;
     }
