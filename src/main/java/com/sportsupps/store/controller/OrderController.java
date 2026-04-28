@@ -85,6 +85,10 @@ public class OrderController {
                 String s = (String) body.get("status");
                 if (!VALID_STATUSES.contains(s))
                     return ResponseEntity.badRequest().body(ApiResponse.error("Invalid status."));
+                String previousStatus = o.getStatus();
+                if (!"cancelled".equals(previousStatus) && "cancelled".equals(s)) {
+                    service.restoreStock(o);
+                }
                 o.setStatus(s);
             }
             if (body.containsKey("items")) {
