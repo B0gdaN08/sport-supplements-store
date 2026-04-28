@@ -40,46 +40,46 @@
         <input type="hidden" id="editMode" value="put" />
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">Name *</label>
+            <label class="form-label" for="editName">Name *</label>
             <input type="text" id="editName" class="form-control" />
             <span class="form-error" id="editNameError">Required</span>
           </div>
           <div class="form-group">
-            <label class="form-label">Brand</label>
+            <label class="form-label" for="editBrand">Brand</label>
             <input type="text" id="editBrand" class="form-control" />
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Description</label>
+          <label class="form-label" for="editDescription">Description</label>
           <textarea id="editDescription" class="form-control"></textarea>
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">Price (€) *</label>
+            <label class="form-label" for="editPrice">Price (€) *</label>
             <input type="number" id="editPrice" class="form-control" min="0" step="0.01" />
             <span class="form-error" id="editPriceError">Valid price required</span>
           </div>
           <div class="form-group">
-            <label class="form-label">Stock</label>
+            <label class="form-label" for="editStock">Stock</label>
             <input type="number" id="editStock" class="form-control" min="0" />
           </div>
         </div>
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">Category *</label>
+            <label class="form-label" for="editCategoryId">Category *</label>
             <select id="editCategoryId" class="form-control"><option value="">Loading…</option></select>
           </div>
           <div class="form-group">
-            <label class="form-label">Weight (g)</label>
+            <label class="form-label" for="editWeight">Weight (g)</label>
             <input type="number" id="editWeight" class="form-control" min="0" />
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Flavors (comma-separated)</label>
+          <label class="form-label" for="editFlavors">Flavors (comma-separated)</label>
           <input type="text" id="editFlavors" class="form-control" placeholder="Chocolate, Vanilla" />
         </div>
         <div class="form-group">
-          <label class="form-label">Image URL</label>
+          <label class="form-label" for="editImageUrl">Image URL</label>
           <input type="text" id="editImageUrl" class="form-control" placeholder="https://..." />
         </div>
       </div>
@@ -103,16 +103,16 @@
         <form id="checkoutForm" novalidate>
           <div class="grid-2">
             <div class="form-group">
-              <label class="form-label">Your Name *</label>
+              <label class="form-label" for="checkoutName">Your Name *</label>
               <input type="text" id="checkoutName" class="form-control" placeholder="Full name" />
             </div>
             <div class="form-group">
-              <label class="form-label">Email *</label>
+              <label class="form-label" for="checkoutEmail">Email *</label>
               <input type="email" id="checkoutEmail" class="form-control" placeholder="you@example.com" />
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Shipping Address</label>
+            <label class="form-label" for="checkoutAddress">Shipping Address</label>
             <textarea id="checkoutAddress" class="form-control" placeholder="Street, City, Country" rows="2"></textarea>
           </div>
         </form>
@@ -173,33 +173,33 @@
               <form id="createForm" novalidate>
                 <div class="grid-2">
                   <div class="form-group">
-                    <label class="form-label">Name *</label>
+                    <label class="form-label" for="createName">Name *</label>
                     <input type="text" id="createName" class="form-control" placeholder="Product name" />
                     <span class="form-error" id="createNameError">Name is required.</span>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Brand</label>
+                    <label class="form-label" for="createBrand">Brand</label>
                     <input type="text" id="createBrand" class="form-control" placeholder="Brand name" />
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Description</label>
+                  <label class="form-label" for="createDescription">Description</label>
                   <textarea id="createDescription" class="form-control" placeholder="Product description"></textarea>
                 </div>
                 <div class="grid-2">
                   <div class="form-group">
-                    <label class="form-label">Price (€) *</label>
+                    <label class="form-label" for="createPrice">Price (€) *</label>
                     <input type="number" id="createPrice" class="form-control" placeholder="29.99" min="0" step="0.01" />
                     <span class="form-error" id="createPriceError">Valid price required.</span>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Stock</label>
+                    <label class="form-label" for="createStock">Stock</label>
                     <input type="number" id="createStock" class="form-control" placeholder="100" min="0" />
                   </div>
                 </div>
                 <div class="grid-2">
                   <div class="form-group">
-                    <label class="form-label">Category *</label>
+                    <label class="form-label" for="createCategoryId">Category *</label>
                     <select id="createCategoryId" class="form-control"><option value="">Select category</option></select>
                     <span class="form-error" id="createCategoryError">Category is required.</span>
                   </div>
@@ -209,11 +209,11 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Flavors (comma-separated)</label>
+                  <label class="form-label" for="createFlavors">Flavors (comma-separated)</label>
                   <input type="text" id="createFlavors" class="form-control" placeholder="Chocolate, Vanilla, Strawberry" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Image URL</label>
+                  <label class="form-label" for="createImageUrl">Image URL</label>
                   <input type="text" id="createImageUrl" class="form-control" placeholder="https://..." />
                 </div>
                 <div class="btn-group">
@@ -230,11 +230,11 @@
             <div class="panel-header"><span class="panel-title">⚡ Partial Update (PATCH)</span></div>
             <div class="panel-body">
               <div class="form-group">
-                <label class="form-label">Product ID *</label>
+                <label class="form-label" for="patchId">Product ID *</label>
                 <input type="number" id="patchId" class="form-control" placeholder="1" min="1" />
               </div>
               <div class="form-group">
-                <label class="form-label">Field to Update</label>
+                <label class="form-label" for="patchField">Field to Update</label>
                 <select id="patchField" class="form-control" onchange="onPatchFieldChange()">
                   <option value="price">Price (€)</option>
                   <option value="stock">Stock</option>
@@ -244,7 +244,7 @@
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">New Value</label>
+                <label class="form-label" for="patchValue">New Value</label>
                 <input type="text" id="patchValue" class="form-control" placeholder="New value" />
               </div>
               <button class="btn btn-secondary" onclick="patchProduct()">Apply PATCH</button>
@@ -257,7 +257,7 @@
             <div class="panel-header"><span class="panel-title">🔍 Find Product by ID</span></div>
             <div class="panel-body">
               <div class="form-group">
-                <label class="form-label">Product ID</label>
+                <label class="form-label" for="searchId">Product ID</label>
                 <div style="display:flex;gap:8px;">
                   <input type="number" id="searchId" class="form-control" placeholder="1" min="1" />
                   <button class="btn btn-secondary" onclick="findById()">Search</button>

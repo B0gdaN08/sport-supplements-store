@@ -178,7 +178,7 @@ function closeModal() {
   document.getElementById('editModal').classList.remove('open');
 }
 
-async function saveModal() {
+/*async function saveModal() {
   const id = document.getElementById('editId').value;
   const mode = document.getElementById('editMode').value;
   const name = document.getElementById('editName').value.trim();
@@ -206,6 +206,41 @@ async function saveModal() {
     closeModal();
     loadProducts();
   } else {
+    showToast(data.error || 'Update failed.', 'error');
+  }
+}*/
+async function saveModal() {
+  const id = document.getElementById('editId').value;
+  const mode = document.getElementById('editMode').value;
+  const name = document.getElementById('editName').value.trim();
+  const price = document.getElementById('editPrice').value.replace(',', '.');
+  const priceNum = Number(price);
+
+  if (!name) { markError('editName', 'editNameError'); return; }
+  if (!price || isNaN(priceNum) || priceNum < 0) { markError('editPrice', 'editPriceError'); return; }
+
+  const body = {
+    name,
+    price: priceNum,
+    categoryId: Number(document.getElementById('editCategoryId').value),
+    brand: document.getElementById('editBrand').value.trim() || undefined,
+    description: document.getElementById('editDescription').value.trim() || undefined,
+    stock: document.getElementById('editStock').value !== '' ? Number(document.getElementById('editStock').value) : undefined,
+    weight: document.getElementById('editWeight').value !== '' ? Number(document.getElementById('editWeight').value) : undefined,
+    flavors: document.getElementById('editFlavors').value.trim() || undefined,
+    imageUrl: document.getElementById('editImageUrl').value.trim() || undefined,
+  };
+
+  console.log('ENVIANDO:', JSON.stringify(body));
+
+  const method = mode === 'put' ? 'PUT' : 'PATCH';
+  const { ok, data } = await apiFetch(`/api/products/${id}`, { method, body: JSON.stringify(body) });
+  if (ok) {
+    showToast('Product updated!', 'success');
+    closeModal();
+    loadProducts();
+  } else {
+    console.error('ERROR del backend:', data);
     showToast(data.error || 'Update failed.', 'error');
   }
 }

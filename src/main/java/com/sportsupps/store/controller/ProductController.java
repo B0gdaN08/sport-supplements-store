@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -104,7 +105,7 @@ public class ProductController {
 
     @SuppressWarnings("unchecked")
     private List<String> toStringList(Object v) {
-        if (v instanceof List) return (List<String>) v;
-        return List.of(v.toString().split(",\\s*"));
+        if (v instanceof List) return new ArrayList<>((List<String>) v);
+        return new ArrayList<>(List.of(v.toString().split(",\\s*")));
     }
 }

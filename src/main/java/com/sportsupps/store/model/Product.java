@@ -3,6 +3,7 @@ package com.sportsupps.store.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,7 +31,7 @@ public class Product {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_flavors", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "flavor")
-    private List<String> flavors;
+    private List<String> flavors= new ArrayList<>();
 
     private String imageUrl;
     private String createdAt;
