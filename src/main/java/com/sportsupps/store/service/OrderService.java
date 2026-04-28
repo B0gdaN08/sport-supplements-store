@@ -58,6 +58,20 @@ public class OrderService {
     }
 
     public Order update(Order order) {
+        Optional<Order> oldOpt = repo.findById(order.getId());
+
+        if (oldOpt.isPresent()) {
+            Order oldOrder = oldOpt.get();
+
+            boolean wasCancelled = "cancelled".equals(oldOrder.getStatus());
+            boolean nowCancelled = "cancelled".equals(order.getStatus());
+
+            // If is canceled → restore stock
+            if (!wasCancelled && nowCancelled) {
+                restoreStock(oldOrder);
+            }
+        }
+
         return repo.save(order);
     }
 
