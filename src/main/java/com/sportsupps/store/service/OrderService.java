@@ -66,4 +66,15 @@ public class OrderService {
         repo.deleteById(id);
         return true;
     }
+
+    private void restoreStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            productService.findById(item.getProductId()).ifPresent(product -> {
+                if (product.getStock() != null) {
+                    product.setStock(product.getStock() + item.getQuantity());
+                    productService.save(product);
+                }
+            });
+        }
+    }
 }
