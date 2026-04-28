@@ -70,6 +70,15 @@ public class OrderService {
             if (!wasCancelled && nowCancelled) {
                 restoreStock(oldOrder);
             }
+
+            // Update the real object
+            oldOrder.setStatus(order.getStatus());
+            oldOrder.setCustomerName(order.getCustomerName());
+            oldOrder.setCustomerEmail(order.getCustomerEmail());
+            oldOrder.setShippingAddress(order.getShippingAddress());
+            oldOrder.setNotes(order.getNotes());
+
+            return repo.save(oldOrder);
         }
 
         return repo.save(order);
@@ -88,7 +97,7 @@ public class OrderService {
         return true;
     }
 
-    private void restoreStock(Order order) {
+    public void restoreStock(Order order) {
         for (OrderItem item : order.getItems()) {
             productService.findById(item.getProductId()).ifPresent(product -> {
                 if (product.getStock() != null) {
