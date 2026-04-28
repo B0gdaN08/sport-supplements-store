@@ -33,12 +33,15 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.builder().success(true).count(list.size()).data(list).build());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id) {
-        return service.findById(id)
-                .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Order #" + id + " not found.")));
-    }
+   @GetMapping("/{id}")
+   public ResponseEntity<?> getById(@PathVariable Integer id,
+                                    @AuthenticationPrincipal AuthUser authUser) {
+       return service.findById(id)
+               .filter(o -> authUser.isAdmin() || o.getUserId().equals(authUser.getId())) // ✅
+               .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
+               .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                       .body(ApiResponse.error("Order #" + id + " not found.")));
+   }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body,
