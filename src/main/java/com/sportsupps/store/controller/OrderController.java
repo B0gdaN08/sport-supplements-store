@@ -37,7 +37,7 @@ public class OrderController {
    public ResponseEntity<?> getById(@PathVariable Integer id,
                                     @AuthenticationPrincipal AuthUser authUser) {
        return service.findById(id)
-               .filter(o -> authUser.isAdmin() || o.getUserId().equals(authUser.getId())) // ✅
+               .filter(o -> authUser.isAdmin() || o.getUserId().equals(authUser.getId()))
                .map(o -> ResponseEntity.ok(ApiResponse.ok(o)))
                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                        .body(ApiResponse.error("Order #" + id + " not found.")));
