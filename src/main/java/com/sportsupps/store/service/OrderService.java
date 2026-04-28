@@ -107,4 +107,14 @@ public class OrderService {
             });
         }
     }
+    public void reduceStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            productService.findById(item.getProductId()).ifPresent(product -> {
+                if (product.getStock() != null) {
+                    product.setStock(product.getStock() - item.getQuantity());
+                    productService.save(product);
+                }
+            });
+        }
+    }
 }

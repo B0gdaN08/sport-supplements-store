@@ -89,6 +89,9 @@ public class OrderController {
                 if (!"cancelled".equals(previousStatus) && "cancelled".equals(s)) {
                     service.restoreStock(o);
                 }
+                if ("cancelled".equals(previousStatus) && !"cancelled".equals(s)) {
+                    service.reduceStock(o);
+                }
                 o.setStatus(s);
             }
             if (body.containsKey("items")) {
