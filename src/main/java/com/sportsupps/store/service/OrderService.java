@@ -62,7 +62,14 @@ public class OrderService {
     }
 
     public boolean deleteById(Integer id) {
-        if (!repo.existsById(id)) return false;
+        Optional<Order> opt = repo.findById(id);
+        if (opt.isEmpty()) return false;
+
+        Order order = opt.get();
+
+        //Restore stock until to delete
+        restoreStock(order);
+
         repo.deleteById(id);
         return true;
     }
