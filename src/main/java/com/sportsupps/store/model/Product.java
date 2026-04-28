@@ -1,5 +1,6 @@
 package com.sportsupps.store.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -35,4 +36,12 @@ public class Product {
 
     private String imageUrl;
     private String createdAt;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+    private Category category;
+
 }

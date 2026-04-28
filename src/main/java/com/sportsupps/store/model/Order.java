@@ -1,5 +1,6 @@
 package com.sportsupps.store.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -34,4 +35,11 @@ public class Order {
     private String notes;
 
     private String createdAt;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    private User user;
 }

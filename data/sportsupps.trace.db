@@ -295,3 +295,15 @@ WHERE id=1 [42000-214]
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "ORDERS_ITEMS" no encontrada
 Table "ORDERS_ITEMS" not found; SQL statement:
 SELECT * FROM ORDERS_ITEMS [42102-214]
+2026-04-28 22:40:40 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT * [*]FORM ORDERS"
+Syntax error in SQL statement "SELECT * [*]FORM ORDERS"; SQL statement:
+SELECT * FORM ORDERS [42000-214]
+2026-04-28 22:42:31 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "OPRODUCTS" no encontrada
+Table "OPRODUCTS" not found; SQL statement:
+SELECT * FROM OPRODUCTS [42102-214]
+2026-04-28 23:20:24 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "USERS_FAVORITES" no encontrada
+Table "USERS_FAVORITES" not found; SQL statement:
+SELECT * FROM USERS_FAVORITES [42102-214]
